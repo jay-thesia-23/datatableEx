@@ -1,0 +1,72 @@
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css"
+    />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+  </head>
+
+  <body>
+    <table id="myTable">
+      <thead>
+        <tr>
+          <th>RecordId</th>
+          <th>TeamName</th>
+          <th>TeamPlace</th>
+          <th>TotalPerson</th>
+          <th>TeamId</th>
+          <th>PlayerName</th>
+          <th>PlayerJersey</th>
+          <th>PlayerAge</th>
+        </tr>
+      </thead>
+
+      <tbody></tbody>
+    </table>
+  </body>
+
+  <script>
+    var currtbl = $(document).ready(function () {
+      $("#myTable").DataTable({
+        serverSide: true,
+        processing: true,
+        searching: true,
+        ordering: true,
+        paging: true,
+        serverMethod: "get",
+        lengthMenu: [
+          [5, 15, 20, 25, 50, 100, -1],
+          [5, 15, 20, 25, 50, 100, "All"],
+        ],
+        ajax: {
+          url: "/showdata",
+        },
+
+        columns: [
+          { data: "id" },
+          { data: "teamName" },
+          { data: "teamPlace" },
+          { data: "totalPerson" },
+          { data: "id" },
+          { data: "player[0].playerName" },
+          { data: "player[0].playerJersey" },
+          { data: "player[0].playerAge" },
+        ],
+      });
+    });
+
+    async function fetching() {
+      let ans = await fetch("/showData");
+
+      let res = ans.json();
+
+      var t = $("#myTable").DataTable();
+      t.rows.add(res);
+    }
+
+    // fetching();
+  </script>
+</html>
