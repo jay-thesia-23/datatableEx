@@ -14,13 +14,13 @@
       <thead>
         <tr>
           <th>RecordId</th>
-          <th>TeamName</th>
-          <th>TeamPlace</th>
-          <th>TotalPerson</th>
-          <th>TeamId</th>
           <th>PlayerName</th>
           <th>PlayerJersey</th>
           <th>PlayerAge</th>
+          <th>TeamId</th>
+          <th>TeamName</th>
+          <th>TeamPlace</th>
+          <th>TotalPerson</th>
         </tr>
       </thead>
 
@@ -47,13 +47,13 @@
 
         columns: [
           { data: "id" },
-          { data: "teamName" },
-          { data: "teamPlace" },
-          { data: "totalPerson" },
-          { data: "id" },
-          { data: "player[0].playerName" },
-          { data: "player[0].playerJersey" },
-          { data: "player[0].playerAge" },
+          { data: "playerName" },
+          { data: "playerNo" },
+          { data: "playerAge" },
+          { data: "team.id" },
+          { data: "team.teamName" },
+          { data: "team.teamPlace" },
+          { data: "team.totalPerson" },
         ],
       });
     });

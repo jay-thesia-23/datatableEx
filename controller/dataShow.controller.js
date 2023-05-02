@@ -1,6 +1,7 @@
 const player = require("../models").player;
 const team = require("../models").team;
 
+const { Op } = require("sequelize");
 const addDataPost = async (req, res) => {
   let type = req.params.type;
 
@@ -68,41 +69,136 @@ const showDataGet = async (req, res, next) => {
 
   //data added
   try {
-    console.log(req.query, "euriruewirrijir");
-    var draw = req.query.draw;
-    var start = req.query.start;
-    var length = req.query.length;
-    var order_data = req.query.order;
+    const { draw, search, order, start, length } = req.query;
+    const columns = [
+      "id",
+      "teamName",
+      "teamPlace",
+      "totalPerson",
+      "playerAge",
+      "playerNo",
+      "playerName",
+      "teamId",
+    ];
 
-    const columns = ["id", "teamName", "teamPlace", "totalPerson"];
+    console.log(draw, start, order, length);
 
-    if (typeof order_data == "undefined") {
-      var column_name = "team.id";
-      var column_sort_order = "asc";
-    } else {
-      var column_index = req.query.order[0]["column"];
+    const query = {
+      where: {},
+      offset: parseInt(start) || 0,
+      limit: parseInt(length) || 10,
+      order: [],
+    };
 
-      var column_name = req.query.columns[column_index]["data"];
+    if (order.length > 0) {
+      const { column, dir } = order[0];
 
-      var column_sort_order = req.query.order[0]["dir"];
+      console.log(column, "no of column");
+      let columnName = req.query.columns[column].data;
+      console.log(columnName, "column name");
+
+      // if (columnName.includes("team")) {
+      //   let curr = columnName.split(".");
+      //   columnName = curr[1];
+      //   console.log(curr[1]);
+      // }
+
+      query.order.push([columnName, dir]);
     }
 
-    console.log(draw, start, length, order_data);
+    // let value = [Op.or]:{}columns.map((column) => ({
+    //   [column]: { [Op.like]: `%${search.value}%` },
+    // }));
 
-    const data = await team.findAll({
-      include: [{ model: player }],
+    console.log(query, "queryyyyyyyy");
+
+    const data = await player.findAll({
+      order: query.order,
+      offset: query.offset,
+      limit: query.limit,
+
+      where: {
+        [Op.or]: {
+          "$team.teamName$": {
+            [Op.like]: `%${search.value}%`,
+          },
+          "$team.id$": {
+            [Op.like]: `%${search.value}%`,
+          },
+          "$team.teamPlace$": {
+            [Op.like]: `%${search.value}%`,
+          },
+          "$team.totalPerson$": {
+            [Op.like]: `%${search.value}%`,
+          },
+          id: {
+            [Op.like]: `%${search.value}%`,
+          },
+          playerName: {
+            [Op.like]: `%${search.value}%`,
+          },
+          playerNo: {
+            [Op.like]: `%${search.value}%`,
+          },
+          playerAge: {
+            [Op.like]: `%${search.value}%`,
+          },
+        },
+      },
+      include: [
+        {
+          model: team,
+        },
+      ],
     });
 
-    const dataCount = await player.count();
+    const filtered = await data.length;
 
-    console.log(dataCount, "totallllllllllllllll");
+    console.log(filtered, "filtererrr");
+    const dataCount = await player.count({
+      where: {
+        [Op.or]: {
+          "$team.teamName$": {
+            [Op.like]: `%${search.value}%`,
+          },
+          "$team.id$": {
+            [Op.like]: `%${search.value}%`,
+          },
+          "$team.teamPlace$": {
+            [Op.like]: `%${search.value}%`,
+          },
+          "$team.totalPerson$": {
+            [Op.like]: `%${search.value}%`,
+          },
+          id: {
+            [Op.like]: `%${search.value}%`,
+          },
+          playerName: {
+            [Op.like]: `%${search.value}%`,
+          },
+          playerNo: {
+            [Op.like]: `%${search.value}%`,
+          },
+          playerAge: {
+            [Op.like]: `%${search.value}%`,
+          },
+        },
+      },
+      include: [
+        {
+          model: team,
+        },
+      ],
+    });
 
-    console.log(data, "orwoiejr");
+    // console.log(dataCount, "totallllllllllllllll");
+
+    // console.log(data, "orwoiejr");
 
     return res.json({
       draw: draw,
-      recordsTotal: data.count,
-      recordsFiltered: data.count,
+      recordsTotal: dataCount,
+      recordsFiltered: dataCount,
       data: data,
     });
   } catch (error) {
