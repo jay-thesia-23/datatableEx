@@ -94,16 +94,18 @@ const showDataGet = async (req, res, next) => {
       const { column, dir } = order[0];
 
       console.log(column, "no of column");
+
       let columnName = req.query.columns[column].data;
       console.log(columnName, "column name");
 
-      // if (columnName.includes("team")) {
-      //   let curr = columnName.split(".");
-      //   columnName = curr[1];
-      //   console.log(curr[1]);
-      // }
-
-      query.order.push([columnName, dir]);
+      if (columnName.includes("team")) {
+        let curr = columnName.split(".");
+        columnName = curr[1];
+        console.log(curr[1]);
+        query.order.push([curr[0], curr[1], dir]);
+      } else {
+        query.order.push([columnName, dir]);
+      }
     }
 
     // let value = [Op.or]:{}columns.map((column) => ({
