@@ -1,5 +1,6 @@
 const player = require("../models").player;
 const team = require("../models").team;
+const repoMain = require("../repositories/baseRepo.repo");
 
 const { Op } = require("sequelize");
 const addDataPost = async (req, res) => {
@@ -65,8 +66,6 @@ const showPageGet = async (req, res) => {
 };
 
 const showDataGet = async (req, res, next) => {
-  //search
-
   //data added
   try {
     const { draw, search, order, start, length } = req.query;
@@ -90,6 +89,9 @@ const showDataGet = async (req, res, next) => {
       order: [],
     };
 
+    console.log(order, "order ");
+
+    //order sorting
     if (order.length > 0) {
       const { column, dir } = order[0];
 
@@ -108,90 +110,23 @@ const showDataGet = async (req, res, next) => {
       }
     }
 
-    // let value = [Op.or]:{}columns.map((column) => ({
-    //   [column]: { [Op.like]: `%${search.value}%` },
-    // }));
-
     console.log(query, "queryyyyyyyy");
 
-    const data = await player.findAll({
-      order: query.order,
-      offset: query.offset,
-      limit: query.limit,
+    repoMain.setModel(player);
 
-      where: {
-        [Op.or]: {
-          "$team.teamName$": {
-            [Op.like]: `%${search.value}%`,
-          },
-          "$team.id$": {
-            [Op.like]: `%${search.value}%`,
-          },
-          "$team.teamPlace$": {
-            [Op.like]: `%${search.value}%`,
-          },
-          "$team.totalPerson$": {
-            [Op.like]: `%${search.value}%`,
-          },
-          id: {
-            [Op.like]: `%${search.value}%`,
-          },
-          playerName: {
-            [Op.like]: `%${search.value}%`,
-          },
-          playerNo: {
-            [Op.like]: `%${search.value}%`,
-          },
-          playerAge: {
-            [Op.like]: `%${search.value}%`,
-          },
-        },
-      },
-      include: [
-        {
-          model: team,
-        },
-      ],
-    });
+    const data = await repoMain.fetchIncluded(
+      query.order,
+      query.offset,
+      query.limit,
+      search,
+      team
+    );
 
+    console.log(data, "come form the repo");
     const filtered = await data.length;
 
     console.log(filtered, "filtererrr");
-    const dataCount = await player.count({
-      where: {
-        [Op.or]: {
-          "$team.teamName$": {
-            [Op.like]: `%${search.value}%`,
-          },
-          "$team.id$": {
-            [Op.like]: `%${search.value}%`,
-          },
-          "$team.teamPlace$": {
-            [Op.like]: `%${search.value}%`,
-          },
-          "$team.totalPerson$": {
-            [Op.like]: `%${search.value}%`,
-          },
-          id: {
-            [Op.like]: `%${search.value}%`,
-          },
-          playerName: {
-            [Op.like]: `%${search.value}%`,
-          },
-          playerNo: {
-            [Op.like]: `%${search.value}%`,
-          },
-          playerAge: {
-            [Op.like]: `%${search.value}%`,
-          },
-        },
-      },
-      include: [
-        {
-          model: team,
-        },
-      ],
-    });
+    const dataCount = await repoMain.fetchCount(search, team);
 
     // console.log(dataCount, "totallllllllllllllll");
 
@@ -206,22 +141,6 @@ const showDataGet = async (req, res, next) => {
   } catch (error) {
     console.log(error);
   }
-
-  // let data_arr = [];
-
-  // fetchData.forEach((element) => {
-  //   console.log(element.teamName);
-  //   data_arr.push({
-  //     RecordId: element.teamName,
-  //     TeamName: element.teamName,
-  //     TeamPlace: element.teamName,
-  //     TotalPerson: element.teamName,
-  //     TeamId: element.teamName,
-  //     PlayerName: element.teamName,
-  //     PlayerJersey: element.teamName,
-  //     PlayerAge: element.teamName,
-  //   });
-  // });
 };
 
 module.exports = { addDataPost, showDataGet, showPageGet };
